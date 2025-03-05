@@ -1,7 +1,5 @@
 <template>
-  <v-sheet>
     <img alt="Vue logo" src="../assets/logo.png">
-  </v-sheet>
 </template>
 
 <script>
