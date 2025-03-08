@@ -1,5 +1,4 @@
 <template>
-    <img alt="Vue logo" src="../assets/logo.png">
     <v-container>
     <h1 class="text-center">User List</h1>
     <v-card v-for="user in users" :key="user.id" class="mb-4 pa-4">

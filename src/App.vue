@@ -31,8 +31,8 @@
 
     <!-- Main Content Area -->
     <v-main>
-      <v-container fluid class="content-container">
-        <v-sheet class="content-sheet border" color="content" rounded="xl" border="border double opacity-100 md">
+      <v-container fluid class="content-container d-flex flex-column fill-height pa-4">
+        <v-sheet class="content-sheet border flex-grow-1 pa-4" color="content" rounded="xl" border="border double opacity-100 md">
           <router-view></router-view>
         </v-sheet>
       </v-container>
@@ -70,6 +70,9 @@ export default {
   height: calc(100vh - 20px);
   padding: 10px;
   background: #FAFAFA;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 100vh !important;
 }
 
 .content-sheet {
@@ -79,6 +82,9 @@ export default {
   border-radius: 20px;
   background: blue;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  flex-grow: 1 !important;
+  display: flex;
+  flex-direction: column;
 }
 
 /* .active-item {
