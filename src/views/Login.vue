@@ -37,7 +37,7 @@ const login = async () => {
     // Fetch user data from the "User" table
     const { data: userData, error: userError } = await supabase
       .from("User")
-      .select("id, isAdmin, isManagement, isResident")
+      .select("id, isAdmin, isManagement, isResident, isVerified")
       .eq("id", data.user.id)
       .single();
 
@@ -48,7 +48,7 @@ const login = async () => {
       router.push("/admin-dashboard");
     } else if (userData.isManagement) {
       router.push("/management-dashboard");
-    } else if (userData.isResident) {
+    } else if (userData.isResident && userData.isVerified) {
       router.push("/resident-dashboard");
     } else {
       errorMessage.value = "Unauthorized role.";
