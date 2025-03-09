@@ -2,7 +2,7 @@
     <v-container>
     <h1 class="text-center">User List</h1>
     <v-card v-for="user in users" :key="user.id" class="mb-4 pa-4">
-      <p><strong>Name:</strong> {{ user.full_name }}</p>
+      <p><strong>Name:</strong> {{ user.fullName }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
       <p><strong>Phone:</strong> {{ user.phone }}</p>
       <p><strong>Role:</strong> {{ user.isResident ? 'Resident' : 'Management' }}</p>
