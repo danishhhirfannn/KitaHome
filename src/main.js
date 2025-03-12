@@ -39,7 +39,7 @@ const vuetify = createVuetify({
   defaults: {
     global: {
       style: {
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: 'Inter, sans-serif, Roboto',
       },
     },
   },
