@@ -7,7 +7,8 @@ import mgmtDashboard from '@/views/management/mgmtDashboard.vue'
 import resDashboard from '@/views/resident/resDashboard.vue'
 
 const routes = [
-  { path: "/", component: Signup },
+  { path: "/", component: Login },
+  { path: "/signup", component: Signup },
   { path: "/admin-dashboard", component: adminDashboard },
   { path: "/management-dashboard", component: mgmtDashboard },
   { path: "/resident-dashboard", component: resDashboard },

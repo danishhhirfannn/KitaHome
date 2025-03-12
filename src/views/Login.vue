@@ -1,13 +1,14 @@
 <template>
     <v-container>
       <v-card class="pa-5">
-        <v-card-title>Login</v-card-title>
+        <v-card-title>Resident Login</v-card-title>
         <v-card-text>
           <v-text-field v-model="email" label="Email" type="email" required></v-text-field>
           <v-text-field v-model="password" label="Password" type="password" required></v-text-field>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="login">Login</v-btn>
+          <v-btn color="primary me-auto" @click="login">Login</v-btn>
+          <v-btn color="primary">Sign Up</v-btn>
         </v-card-actions>
         <p v-if="errorMessage" class="text-red">{{ errorMessage }}</p>
       </v-card>
