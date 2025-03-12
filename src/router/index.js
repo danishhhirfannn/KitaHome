@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+import ProfileManagement from '../views/ProfileManagement.vue'
 import Login from '@/views/Login.vue'
 import Signup from '@/views/Signup.vue'
 import adminDashboard from '@/views/admin/adminDashboard.vue'
@@ -11,6 +11,7 @@ const routes = [
   { path: "/admin-dashboard", component: adminDashboard },
   { path: "/management-dashboard", component: mgmtDashboard },
   { path: "/resident-dashboard", component: resDashboard },
+  { path: "/profile-management", component: ProfileManagement },
 ]
 
 const router = createRouter({

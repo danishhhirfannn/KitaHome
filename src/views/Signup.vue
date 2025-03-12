@@ -68,7 +68,7 @@ const register = async () => {
     const { error: dbError } = await supabase.from("User").insert({
       id: userId,
       email: email.value,
-      full_name: fullName.value,
+      fullName: fullName.value,
       phone: phone.value,
       isResident: true,
       isManagement: false,

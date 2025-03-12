@@ -39,6 +39,7 @@ export default {
       items: [
         { title: "Home", icon: "mdi-home", to: "/" },
         { title: "About", icon: "mdi-information", to: "/about" },
+        { title: "Profile Management", icon: "mdi-account", to:"/profile-management"}
       ],
     };
   },
