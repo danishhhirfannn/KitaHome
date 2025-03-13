@@ -1,5 +1,5 @@
 <template>
-  <div class="fill-height d-flex justify-center align-center gradient-bg pe-12">
+  <div class="d-flex justify-center align-center gradient-bg pr-10 pl-10">
     <v-row justify="center" align="center" class="fill-height">
       <v-col justify="center" align="center">
         <!-- Logo -->
@@ -69,8 +69,8 @@ const login = async () => {
     // Fetch user data from the "User" table
     const { data: userData, error: userError } = await supabase
       .from("User")
-      .select("id, isAdmin, isManagement, isResident, isVerified")
-      .eq("id", data.user.id)
+      .select("userID, isAdmin, isManagement, isResident, isVerified")
+      .eq("userID", data.user.id)
       .single();
 
     if (userError) throw userError;
@@ -93,19 +93,61 @@ const login = async () => {
 
 <style scoped>
 @keyframes gradientAnimation {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% { background-position: 0% 50%; filter: brightness(1); }
+  25% { background-position: 50% 100%; filter: brightness(1.1); }
+  50% { background-position: 100% 50%; filter: brightness(1); }
+  75% { background-position: 50% 0%; filter: brightness(0.9); }
+  100% { background-position: 0% 50%; filter: brightness(1); }
 }
 
 .gradient-bg {
-  background: linear-gradient(-45deg, #1e3a8a, #3b82f6, #60a5fa, #1e40af);
-  background-size: 400% 400%;
-  animation: gradientAnimation 6s ease infinite;
-  overflow: hidden;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 60%),
+              linear-gradient(-45deg, #0d47a1, #1976d2, #42a5f5, #64b5f6, #90caf9, #bbdefb);
+  background-size: 300% 300%;
+  animation: gradientAnimation 8s ease infinite;
+  height: 100vh;
+  align-content: center;
 }
 
 .text-red {
   color: red;
+}
+
+@media (max-width: 600px) {
+  .gradient-bg {
+    padding: 0 12px; /* Add padding to prevent side cut-off */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .v-img {
+    width: 60% !important; /* Make logo responsive */
+    max-width: 200px;
+    margin-bottom: -10px !important; /* Bring it closer */
+  }
+
+  .v-card {
+    width: 100% !important; /* Full width on mobile */
+    max-width: 350px; /* Prevent it from getting too large */
+    padding: 20px !important; /* Adjust spacing */
+  }
+
+  .v-card-title {
+    font-size: 1.5rem !important; /* Adjust title size */
+  }
+
+  .v-card-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  .v-text-field {
+    font-size: 1rem !important; /* Ensure form fields are readable */
+  }
+
+  .v-btn {
+    font-size: 1rem !important;
+    padding: 12px !important; /* Make button tap-friendly */
+  }
 }
 </style>

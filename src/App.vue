@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
 </script>
 
 
-<style scoped>
+<style>
 #app {
   font-family: 'Inter' !important;
   -webkit-font-smoothing: antialiased;
@@ -227,4 +227,19 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center !important;
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Completely removes the scrollbar */
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Ensures no unwanted scrollbars */
+}
+
 </style>
