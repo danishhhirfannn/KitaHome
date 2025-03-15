@@ -1,140 +1,239 @@
 <template>
   <v-container class="fill-height d-flex align-center justify-center">
-    <v-card class="elevation-2 rounded-xl overflow-hidden" max-width="900">
-      <v-row no-gutters>
-        <v-col cols="12" md="6" class="pa-12 d-flex flex-column justify-center bg-light">
-          <v-img :src="KitaHomeLogo" alt="KitaHome Logo" contain max-height="50" class="mb-8 d-block"></v-img>
-          <h2 class="text-h5 font-weight-bold text-left">Let us help you manage your home efficiently.</h2>
-          <p class="text-body-2 mt-4 text-left">Our registration process is quick and easy, ensuring secure access to your residential community.</p>
+    <v-card class="elevation-2 rounded-xl overflow-hidden pa-5" max-width="500">
+      <v-card-title class="text-h5 font-weight-bold text-left">
+        {{ stepTitle }}
+      </v-card-title>
+      <p class="text-left text-caption mb-4">{{ stepDescription }}</p>
 
-          <v-card class="mt-8 pa-6 rounded-lg" color="indigo">
-            <p class="text-body-2 text-left">KitaHome has transformed how we manage our community, making everything seamless and organized!</p>
+      <!-- Progress Bar -->
+      <v-progress-linear :value="progress" color="indigo" height="8"></v-progress-linear>
 
-            <!-- Avatar & Name Inline -->
-            <v-card-actions class="mt-4 d-flex align-center">
-              <v-avatar size="40">
-                <v-img :src="Avatar" alt="Resident"></v-img>
-              </v-avatar>
-              <div class="d-flex flex-column align-start ml-3">
-                <span class="font-weight-medium">Lucas Lim</span>
-                <span class="font-weight-thin text-caption">Resident</span>
-              </div>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-
-        
-        <!-- Right Section - Registration Form -->
-        <v-col cols="12" md="6" class="pa-8">
-          <v-card-title class="text-h5 font-weight-bold text-left pl-0">Create your account now</v-card-title>
-          <p class="text-left text-caption mb-8 mt-n2">Signing up for KitaHome is fast and 100% free.</p>
-          
-          <v-form @submit.prevent="register">
+      <v-card-text>
+        <v-form @submit.prevent="handleNextStep">
+          <!-- Step 1: User Information -->
+          <template v-if="step === 1">
             <v-text-field v-model="fullName" label="Full Name" variant="outlined" density="comfortable" required></v-text-field>
             <v-text-field v-model="email" label="Email" variant="outlined" density="comfortable" type="email" required></v-text-field>
             <v-text-field v-model="password" label="Password" variant="outlined" density="comfortable" type="password" required></v-text-field>
             <v-text-field v-model="phone" label="Phone Number" variant="outlined" density="comfortable" required></v-text-field>
-            <v-file-input label="Upload Identification Document" variant="outlined" density="comfortable" @change="handleFileUpload"></v-file-input>
-            
-            <v-btn type="submit" color="primary" block class="mt-4" :loading="loading">
-              Sign Up
-            </v-btn>
-          </v-form>
-          
-          <v-alert v-if="errorMessage" type="error" class="mt-3">{{ errorMessage }}</v-alert>
-          <p class="text-body-2 text-center mt-3">Already have an account? <a href="/login" class="text-primary">Login</a></p>
-        </v-col>
-      </v-row>
+          </template>
+
+          <!-- Step 2: Select Residence -->
+          <template v-if="step === 2">
+            <v-select
+              v-model="residenceID"
+              :items="residences"
+              item-title="residenceName"
+              item-value="residenceID"
+              label="Choose Your Residence"
+              variant="outlined"
+              density="comfortable"
+              required
+            >
+              <template v-slot:selection="{ item }">
+                <v-avatar size="40">
+                  <v-img :src="item.raw.displayPhotoUrl" alt="Residence Image"></v-img>
+                </v-avatar>
+                <span class="ml-2">{{ item.raw.residenceName }}</span>
+              </template>
+            </v-select>
+
+            <v-text-field v-model="unitNumber" label="Unit Number" variant="outlined" density="comfortable" required></v-text-field>
+          </template>
+
+          <!-- Step 3: Upload ID -->
+          <template v-if="step === 3">
+            <v-file-input
+              label="Upload ID (IC/Passport)"
+              accept="image/*"
+              variant="outlined"
+              density="comfortable"
+              required
+              v-model="identificationFile"
+              @change="handleFileUpload"
+            ></v-file-input>
+          </template>
+
+          <v-btn type="submit" color="primary" block class="mt-4" :loading="loading">
+            {{ step === 3 ? "Finish" : "Continue" }}
+          </v-btn>
+        </v-form>
+
+        <!-- Error Alert -->
+        <v-alert v-if="errorMessage" type="error" class="mt-3">{{ errorMessage }}</v-alert>
+
+        <!-- Step Navigation -->
+        <v-btn v-if="step > 1" variant="text" class="mt-3" @click="step--">Back</v-btn>
+      </v-card-text>
+
+      <p class="text-body-2 text-center mt-3">
+        Already have an account? <router-link to="/" class="text-primary">Login</router-link>
+      </p>
     </v-card>
   </v-container>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "@/api/supabase";
-import KitaHomeLogo from "@/assets/KitaHome_Logo.png";
-import Avatar from "@/assets/avatar.jpg";
 
-const email = ref("");
-const password = ref("");
-const fullName = ref("");
-const phone = ref("");
-const idFile = ref(null);
+const step = ref(1);
 const loading = ref(false);
 const errorMessage = ref("");
+const userId = ref(null);
+
+// Step 1: User Information
+const fullName = ref("");
+const email = ref("");
+const password = ref("");
+const phone = ref("");
+
+// Step 2: Residence Selection
+const residenceID = ref(null);
+const residences = ref([]);
+const unitNumber = ref("");
+
+// Step 3: Upload ID
+const identificationFile = ref(null);
 const router = useRouter();
 
-// Handle File Upload
-const handleFileUpload = (event) => {
-  idFile.value = event.target.files[0];
+// Fetch residences from database
+onMounted(async () => {
+  try {
+    const { data, error } = await supabase.from("Residence").select("residenceID, residenceName, displayPhotoUrl");
+    if (error) throw new Error("Failed to load residences.");
+    residences.value = data;
+  } catch (err) {
+    errorMessage.value = err.message;
+  }
+});
+
+// Handle next step
+const handleNextStep = async () => {
+  if (step.value === 1) {
+    step.value++;
+  } else if (step.value === 2) {
+    if (!residenceID.value || !unitNumber.value) {
+      errorMessage.value = "Please select your residence and enter your unit number.";
+      return;
+    }
+    await createAccount(); // Create account here
+  } else if (step.value === 3) {
+    await uploadIdentification();
+  } else {
+    step.value++;
+  }
 };
 
-// Register Resident
-const register = async () => {
+// Create Account (after residence selection)
+const createAccount = async () => {
   loading.value = true;
   errorMessage.value = "";
-
   try {
-    // Step 1: Register User in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
-    });
-
+    const { data, error } = await supabase.auth.signUp({ email: email.value, password: password.value });
     if (error) throw error;
 
-    const userId = data.user.id;
+    if (!data.user) throw new Error("User creation failed.");
+    userId.value = data.user.id;
 
-    // Step 2: Upload Identification Document
-    const filePath = `identifications/${userId}_${idFile.value.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from("identifications")
-      .upload(filePath, idFile.value, { upsert: true });
-
-    if (uploadError) throw uploadError;
-
-    const publicUrl = supabase.storage
-      .from("identifications")
-      .getPublicUrl(filePath).publicUrl;
-
-    // Step 3: Insert user details into the "User" table
-    const { error: dbError } = await supabase.from("User").insert({
-      id: userId,
+    const { error: insertError } = await supabase.from("User").insert({
+      userID: userId.value,
       email: email.value,
       fullName: fullName.value,
       phone: phone.value,
+      residenceID: residenceID.value,
+      unitNumber: unitNumber.value,
       isResident: true,
-      isManagement: false,
-      isAdmin: false,
       isVerified: false,
-      identification_url: publicUrl,
+      isDeclined: false,
     });
 
-    if (dbError) throw dbError;
+    if (insertError) throw new Error("Failed to create user in database.");
 
-    alert("Registration successful! Awaiting admin approval.");
-    router.push("/"); // Redirect to the login page
+    step.value++;
   } catch (err) {
     errorMessage.value = err.message;
   } finally {
     loading.value = false;
   }
 };
+
+// Handle file selection
+const handleFileUpload = (event) => {
+  if (event && event.target && event.target.files.length > 0) {
+    identificationFile.value = event.target.files[0]; // Store only the first file
+  }
+};
+
+// Upload Identification
+const uploadIdentification = async () => {
+  loading.value = true;
+  errorMessage.value = "";
+
+  try {
+    if (!identificationFile.value) {
+      throw new Error("No file selected. Please upload an ID before proceeding.");
+    }
+    if (!userId.value) {
+      throw new Error("User ID is missing. Cannot upload identification.");
+    }
+
+    const file = identificationFile.value;
+
+    // Ensure it's a valid File object
+    if (!(file instanceof File)) {
+      throw new Error("Invalid file format. Please upload a valid image.");
+    }
+
+    const filePath = `identifications/${userId.value}-${file.name}`;
+
+    console.log("Uploading file to:", filePath);
+
+    // Upload file
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("identifications")
+      .upload(filePath, file);
+
+    if (uploadError) throw new Error("File upload failed: " + uploadError.message);
+
+    console.log("Upload successful:", uploadData);
+
+    // Get public URL
+    const { data: fileData } = supabase.storage
+      .from("identifications")
+      .getPublicUrl(filePath);
+
+    if (!fileData) throw new Error("Failed to fetch uploaded file URL.");
+
+    console.log("File URL:", fileData.publicUrl);
+
+    // Update user record with file URL
+    const { error: updateError } = await supabase
+      .from("User")
+      .update({ identification_url: fileData.publicUrl })
+      .eq("userID", userId.value);
+
+    if (updateError) throw new Error("Failed to update user: " + updateError.message);
+
+    console.log("User record updated with identification URL");
+
+    router.push("/");
+  } catch (err) {
+    console.error("❌ Upload error:", err.message);
+    errorMessage.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Progress bar & step titles
+const progress = computed(() => (step.value / 3) * 100);
+const stepTitle = computed(() => ["Enter Your Details", "Select Your Residence", "Upload Identification"][step.value - 1]);
+const stepDescription = computed(() => [
+  "Signing up for KitaHome is fast and free.",
+  "Choose your residence and enter your unit number.",
+  "Upload a photo of your IC or passport for verification."
+][step.value - 1]);
 </script>
-
-<style scoped>
-/* Adjust form spacing and readability */
-.v-label {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-.v-text-field,
-.v-file-input {
-  max-width: 100%;
-}
-
-.v-btn {
-  font-weight: 600;
-}
-</style>

@@ -112,7 +112,7 @@ const fetchUserRole = async (userId) => {
   const { data: userData, error } = await supabase
     .from("User")
     .select("isAdmin, isManagement, isResident")
-    .eq("id", userId)
+    .eq("userID", userId)
     .single();
 
   if (error) {

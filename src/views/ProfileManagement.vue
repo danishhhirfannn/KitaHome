@@ -63,23 +63,6 @@
     <!-- Pagination -->
     <v-pagination v-model="page" :length="5" class="mt-4" />
   </v-container>
-  
-  <v-container>
-    <v-card class="pa-4" elevation="2">
-      <v-card-title>Upload Document</v-card-title>
-      <v-card-text>
-        <input type="file" @change="handleFileChange" />
-        <v-btn @click="uploadFile" class="mt-3" color="primary">Upload</v-btn>
-      </v-card-text>
-    </v-card>
-
-    <v-card v-if="uploadedUrl" class="mt-4 pa-4">
-      <v-card-title>Uploaded File</v-card-title>
-      <v-card-text>
-        <a :href="uploadedUrl" target="_blank">View Document</a>
-      </v-card-text>
-    </v-card>
-  </v-container>
 </template>
 
 <script>
@@ -142,32 +125,6 @@ export default {
     handleFileChange(event) {
       this.file = event.target.files[0];
     },
-
-    // Upload file to Supabase
-    async uploadFile() {
-      if (!this.file) {
-        alert("Please select a file first.");
-        return;
-      }
-
-      const fileName = `${Date.now()}-${this.file.name}`; // Ensure unique file names
-      const { data, error } = await supabase.storage
-        .from("identifications") 
-        .upload(fileName, this.file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) {
-        console.error("Upload Error:", error.message);
-        alert("File upload failed.");
-        return;
-      }
-
-      // Get Public URL of the uploaded file
-      const { data: urlData } = supabase.storage.from("documents").getPublicUrl(fileName);
-      this.uploadedUrl = urlData.publicUrl;
-    }
   },
 }
 </script>
